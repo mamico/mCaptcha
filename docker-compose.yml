@@ -6,7 +6,11 @@ version: "3.9"
 
 services:
   mcaptcha:
-    image: mcaptcha/mcaptcha:latest
+    # image: mcaptcha/mcaptcha:latest
+    image: mcaptcha:local
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - 7000:7000
     env_file:

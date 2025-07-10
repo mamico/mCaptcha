@@ -6,6 +6,12 @@ SPDX-License-Identifier: MIT OR Apache-2.0
 
 <. include!("../components/headers/widget-headers.html"); .>
   <body>
+    <!-- <div class="language-selector">
+      <select id="language-selector" class="language-selector__select">
+        <option value="en">English</option>
+        <option value="it">Italiano</option>
+      </select>
+    </div> -->
     <main class="widget__container">
       <form class="widget__inner-container">
           <noscript>
@@ -60,3 +66,115 @@ SPDX-License-Identifier: MIT OR Apache-2.0
              role="progressbar" class="progress__fill"></div></div>
     </main>
 <.include!("./footer.html"); .>
+
+<script>
+  // Oggetto contenente le traduzioni
+  const translations = {
+    en: {
+      notRobot: "I'm not a robot",
+      privacy: "Privacy",
+      terms: "Terms",
+      enableJs: "Please enable JavaScript to receive mCaptcha challenge",
+      sourceCode: "Read our source code"
+    },
+    it: {
+      notRobot: "Non sono un robot",
+      privacy: "Privacy",
+      terms: "Termini",
+      enableJs: "Abilita JavaScript per ricevere la sfida mCaptcha",
+      sourceCode: "Vedi il codice sorgente"
+    }
+    // Aggiungi altre lingue qui
+  };
+
+  // Funzione per aggiornare il testo nella pagina
+  function updateTexts(lang) {
+    const langData = translations[lang] || translations['en'];
+    
+    // Aggiorna i testi
+    document.getElementById('widget__verification-text').textContent = langData.notRobot;
+    document.querySelector('.widget__verification-checkbox').setAttribute('aria-valuenow', langData.notRobot);
+    // document.querySelector('.widget__noscript-warning').textContent = langData.enableJs;
+    document.querySelector('.widget__source-code').textContent = langData.sourceCode;
+    
+    // Aggiorna i link di privacy e termini
+    const privacyLinks = document.querySelectorAll('a[href*="privacy"]');
+    const termsLinks = document.querySelectorAll('a[href*="security"]');
+    
+    privacyLinks.forEach(link => {
+      if (!link.textContent.includes('http')) { // Per evitare di modificare i link esterni
+        link.textContent = langData.privacy;
+      }
+    });
+    
+    termsLinks.forEach(link => {
+      if (!link.textContent.includes('http')) { // Per evitare di modificare i link esterni
+        link.textContent = langData.terms;
+      }
+    });
+  }
+
+  // Funzione per ottenere il parametro dalla query string
+  function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+  }
+
+  // Gestione del cambio lingua
+  document.addEventListener('DOMContentLoaded', () => {
+    const languageSelector = document.getElementById('language-selector');
+    
+    // Cerca il parametro 'lang' nella query string
+    const urlLang = getQueryParam('lang');
+    
+    // Ordine di priorità per la selezione della lingua:
+    // 1. Parametro 'lang' nella query string
+    // 2. Lingua salvata nel localStorage
+    // 3. Lingua del browser
+    let selectedLang;
+    
+    if (urlLang && urlLang in translations) {
+      selectedLang = urlLang;
+    } else {
+      const savedLang = localStorage.getItem('preferredLanguage') || navigator.language.split('-')[0];
+      selectedLang = (savedLang in translations) ? savedLang : 'en';
+    }
+    
+    // Imposta la lingua selezionata
+    languageSelector.value = selectedLang;
+    
+    // Aggiorna i testi all'avvio
+    updateTexts(selectedLang);
+    
+    // Gestisci il cambio lingua
+    // languageSelector.addEventListener('change', (e) => {
+    //   const lang = e.target.value;
+    //   localStorage.setItem('preferredLanguage', lang);
+    //   updateTexts(lang);
+    //   const url = new URL(window.location);
+    //   url.searchParams.set('lang', lang);
+    //   window.history.pushState({}, '', url);
+    //   });
+  });
+</script>
+
+<style>
+  .language-selector {
+    text-align: right;
+    padding: 8px;
+  }
+  
+  .language-selector__select {
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: white;
+    font-size: 14px;
+  }
+  
+  .language-selector__select:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+  }
+</style>

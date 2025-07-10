@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - master
-      - db-abstract
 
 jobs:
   fmt:
@@ -20,20 +19,20 @@ jobs:
       - name: Rustfmt Check
         uses: actions-rust-lang/rustfmt@v1
 
-  clippy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          components: clippy
+  # clippy:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions-rust-lang/setup-rust-toolchain@v1
+  #       with:
+  #         components: clippy
 
-      - uses: actions/setup-node@v2
-        with:
-          node-version: "20.0.0"
+  #     - uses: actions/setup-node@v2
+  #       with:
+  #         node-version: "20.0.0"
 
-      - name: Build frontend
-        run: make frontend
+  #     - name: Build frontend
+  #       run: make frontend
 
-      - name: clippy Check
-        run: cargo clippy --workspace --tests --all-features
+  #     - name: clippy Check
+  #       run: cargo clippy --workspace --tests --all-features

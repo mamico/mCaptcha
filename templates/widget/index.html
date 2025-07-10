@@ -122,7 +122,7 @@ SPDX-License-Identifier: MIT OR Apache-2.0
 
   // Gestione del cambio lingua
   document.addEventListener('DOMContentLoaded', () => {
-    const languageSelector = document.getElementById('language-selector');
+    // const languageSelector = document.getElementById('language-selector');
     
     // Cerca il parametro 'lang' nella query string
     const urlLang = getQueryParam('lang');
@@ -141,7 +141,7 @@ SPDX-License-Identifier: MIT OR Apache-2.0
     }
     
     // Imposta la lingua selezionata
-    languageSelector.value = selectedLang;
+    // languageSelector.value = selectedLang;
     
     // Aggiorna i testi all'avvio
     updateTexts(selectedLang);

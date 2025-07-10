@@ -6,12 +6,6 @@ SPDX-License-Identifier: MIT OR Apache-2.0
 
 <. include!("../components/headers/widget-headers.html"); .>
   <body>
-    <!-- <div class="language-selector">
-      <select id="language-selector" class="language-selector__select">
-        <option value="en">English</option>
-        <option value="it">Italiano</option>
-      </select>
-    </div> -->
     <main class="widget__container">
       <form class="widget__inner-container">
           <noscript>
@@ -71,6 +65,11 @@ SPDX-License-Identifier: MIT OR Apache-2.0
   // Oggetto contenente le traduzioni
   const translations = {
     en: {
+      before: "I'm not a robot",
+      during: "Processing...",
+      after: "Verified!",
+      error: "Something went wrong",
+      
       notRobot: "I'm not a robot",
       privacy: "Privacy",
       terms: "Terms",
@@ -78,6 +77,11 @@ SPDX-License-Identifier: MIT OR Apache-2.0
       sourceCode: "Read our source code"
     },
     it: {
+      before: "Non sono un robot",
+      during: "Elaborazione in corso...",
+      after: "Verificato!",
+      error: "Si è verificato un errore",
+      
       notRobot: "Non sono un robot",
       privacy: "Privacy",
       terms: "Termini",
@@ -91,11 +95,25 @@ SPDX-License-Identifier: MIT OR Apache-2.0
   function updateTexts(lang) {
     const langData = translations[lang] || translations['en'];
     
-    // Aggiorna i testi
-    document.getElementById('widget__verification-text').textContent = langData.notRobot;
-    document.querySelector('.widget__verification-checkbox').setAttribute('aria-valuenow', langData.notRobot);
-    // document.querySelector('.widget__noscript-warning').textContent = langData.enableJs;
-    document.querySelector('.widget__source-code').textContent = langData.sourceCode;
+    // Aggiorna i testi principali
+    const verificationText = document.getElementById('widget__verification-text');
+    if (verificationText) {
+      // Mantieni il testo corrente se è uno dei messaggi di stato
+      const currentText = verificationText.textContent;
+      const currentKey = Object.keys(translations.en).find(key => translations.en[key] === currentText);
+      if (langData[currentKey])
+        verificationText.textContent = langData[currentKey];
+    }
+    
+    const checkbox = document.querySelector('.widget__verification-checkbox');
+    if (checkbox) {
+      checkbox.setAttribute('aria-valuenow', langData.notRobot);
+    }
+    
+    const sourceCode = document.querySelector('.widget__source-code');
+    if (sourceCode) {
+      sourceCode.textContent = langData.sourceCode;
+    }
     
     // Aggiorna i link di privacy e termini
     const privacyLinks = document.querySelectorAll('a[href*="privacy"]');
@@ -120,6 +138,39 @@ SPDX-License-Identifier: MIT OR Apache-2.0
     return urlParams.get(param);
   }
 
+  // Funzione per osservare le modifiche al testo
+  function observeTextChanges() {
+    const targetNode = document.getElementById('widget__verification-text');
+    if (!targetNode) return;
+
+    // Opzioni per l'observer (cosa osservare)
+    const config = { 
+      characterData: true, 
+      childList: true, 
+      subtree: true 
+    };
+
+    // Callback quando vengono rilevate modifiche
+    const callback = function(mutationsList) {
+      for(const mutation of mutationsList) {
+        if (mutation.type === 'characterData' || mutation.type === 'childList') {
+          const currentLang = localStorage.getItem('preferredLanguage') || 
+                            navigator.language.split('-')[0] || 'en';
+          updateTexts(currentLang);
+          break;
+        }
+      }
+    };
+
+    // Crea un'istanza dell'observer con la funzione di callback
+    const observer = new MutationObserver(callback);
+
+    // Inizia a osservare il nodo target per le modifiche configurate
+    observer.observe(targetNode, config);
+    
+    return observer; // Restituisce l'observer nel caso voglia disconnetterlo in seguito
+  }
+
   // Gestione del cambio lingua
   document.addEventListener('DOMContentLoaded', () => {
     // const languageSelector = document.getElementById('language-selector');
@@ -140,21 +191,16 @@ SPDX-License-Identifier: MIT OR Apache-2.0
       selectedLang = (savedLang in translations) ? savedLang : 'en';
     }
     
-    // Imposta la lingua selezionata
-    // languageSelector.value = selectedLang;
+    // Salva la lingua selezionata
+    if (selectedLang) {
+      localStorage.setItem('preferredLanguage', selectedLang);
+    }
     
     // Aggiorna i testi all'avvio
     updateTexts(selectedLang);
     
-    // Gestisci il cambio lingua
-    // languageSelector.addEventListener('change', (e) => {
-    //   const lang = e.target.value;
-    //   localStorage.setItem('preferredLanguage', lang);
-    //   updateTexts(lang);
-    //   const url = new URL(window.location);
-    //   url.searchParams.set('lang', lang);
-    //   window.history.pushState({}, '', url);
-    //   });
+    // Avvia l'osservazione delle modifiche al testo
+    observeTextChanges();
   });
 </script>
 
